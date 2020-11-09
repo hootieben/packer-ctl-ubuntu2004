@@ -1,0 +1,77 @@
+{
+  "variables": {
+    "ver": "1-{{timestamp}}",
+    "docker_hub_username": "{{env `DOCKER_HUB_USERNAME`}}",
+    "docker_hub_password": "{{env `DOCKER_HUB_PASSWORD`}}",
+    "vagrant_username": "{{env `VAGRANT_USERNAME`}}",
+    "vagrant_token": "{{env `VAGRANT_TOKEN`}}"
+  },
+  "sensitive-variables": [
+    "docker_hub_password",
+    "vagrant_token"
+  ],
+  "builders": [
+    {
+      "name": "docker-2004",
+      "type": "docker",
+      "image": "ubuntu:focal",
+      "commit": true,
+      "changes": [
+        "CMD [\"/bin/bash\"]"
+      ]
+    },
+    {
+      "name": "vagrant-2004",
+      "type": "vagrant",
+      "communicator": "ssh",
+      "provider": "virtualbox",
+      "source_path": "ubuntu/focal64"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "./scripts/setup.sh"
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "./ansible/playbook.yml"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+
+        "type": "docker-tag",
+        "only":[
+          "docker-2004"
+        ],
+        "repository": "{{ user `docker_hub_username` }}/ctl-ubuntu2004",
+        "tags": [
+          "latest",
+          "{{ user `ver` }}"
+        ]
+      },
+      {
+        "type": "docker-push",
+        "only":[
+          "docker-2004"
+        ],
+        "login": true,
+        "login_username": "{{ user `docker_hub_username` }}",
+        "login_password": "{{ user `docker_hub_password` }}"
+      }
+    ],
+    [
+      {
+        "type": "vagrant-cloud",
+        "only":[
+          "vagrant-2004"
+        ],
+        "box_tag": "{{ user `vagrant_username` }}/ctl-ubuntu2004",
+        "access_token": "{{user `vagrant_token`}}",
+        "version": "{{ user `ver` }}"
+      }
+    ]
+  ]
+}

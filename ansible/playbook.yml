@@ -1,0 +1,95 @@
+---
+- name: "Provision CTL Images"
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: "Gather facts"
+      gather_facts:
+
+    - name: "Update/upgrade {{ ansible_distribution_release }} packages"
+      apt:
+        update_cache: true
+        upgrade: true
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: "Install Base Packages"
+      package:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - dnsutils
+          - fdutils
+          - fzf
+          - git
+          - jq
+          - lsof
+          - procps
+          - python3-boto3
+          - python3-packaging
+          - python3-pip
+          - ripgrep
+          - rsyslog
+          - silversearcher-ag
+          - sysstat
+          - unattended-upgrades
+          - unzip
+          - vim
+          - wget
+          - zsh
+
+    - name: "Fetch AWS CLI v2"
+      unarchive:
+        remote_src: true
+        src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/
+        mode: 0755
+        creates: /tmp/aws
+      register: aws_cli_fetch
+
+    - name: "Install AWS CLI V2"
+      command: /tmp/aws/install
+      when:
+        - not aws_cli_fetch is skipped
+        - aws_cli_fetch
+
+    - name: "Install Go"
+      unarchive:
+        remote_src: true
+        src: "https://golang.org/dl/go1.15.4.linux-amd64.tar.gz"
+        dest: "/usr/local"
+        mode: 0755
+        creates: /usr/local/go
+
+    - name: "Install TFENV"
+      git:
+        repo: 'https://github.com/tfutils/tfenv.git'
+        dest: /usr/local/tfenv
+        version: v2.0.0
+        accept_hostkey: true
+
+    - name: "Link TFENV binary"
+      file:
+        src: /usr/local/tfenv/bin/tfenv
+        dest: /usr/local/bin/tfenv
+        state: link
+        owner: root
+        group: root
+
+    - name: "Install TGENV"
+      git:
+        repo: 'https://github.com/cunymatthieu/tgenv.git'
+        dest: /usr/local/tgenv
+        version: v0.0.3
+        accept_hostkey: true
+
+    - name: "Link TGENV binary"
+      file:
+        src: /usr/local/tgenv/bin/tgenv
+        dest: /usr/local/bin/tgenv
+        state: link
+        owner: root
+        group: root
+

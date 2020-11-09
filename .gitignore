@@ -1,0 +1,20 @@
+# Cache objects
+packer_cache/
+
+# Crash log
+crash.log
+
+# For built boxes
+*.box
+
+# For direnv
+.direnv/
+
+# Uncomment below to ignore direnv configuration
+.envrc
+
+# Archived files
+*.bak
+
+# Vagrant output
+output-*
