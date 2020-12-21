@@ -24,6 +24,7 @@
           - fdutils
           - fzf
           - git
+          - irpas
           - jq
           - lsof
           - procps
@@ -39,6 +40,12 @@
           - vim
           - wget
           - zsh
+
+    - name: "Install SRE Packages"
+      package:
+        name:
+          - ansible
+          - vagrant
 
     - name: "Fetch AWS CLI v2"
       unarchive:
