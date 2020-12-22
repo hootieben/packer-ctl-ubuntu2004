@@ -10,8 +10,8 @@
 
     - name: "Update/upgrade {{ ansible_distribution_release }} packages"
       apt:
-        update_cache: true
-        upgrade: true
+        update_cache: 'yes'
+        upgrade: 'yes'
       when: ansible_facts['os_family'] == 'Debian'
 
     - name: "Install Base Packages"
@@ -38,6 +38,7 @@
           - unattended-upgrades
           - unzip
           - vim
+          - virtualbox-qt
           - wget
           - zsh
 
