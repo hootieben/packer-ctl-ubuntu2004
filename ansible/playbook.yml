@@ -48,6 +48,12 @@
           - ansible
           - vagrant
 
+    - name: "Install SRE Packages: pip"
+      pip:
+        name:
+          - pywinrm #used to run Ansible against Windows nodes
+          - redis #used in litmus-admin-ansible
+
     - name: "Fetch AWS CLI v2"
       unarchive:
         remote_src: true
