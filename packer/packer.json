@@ -46,7 +46,7 @@
         "only":[
           "docker-2004"
         ],
-        "repository": "{{ user `docker_hub_username` }}ctl-ubuntu2004",
+        "repository": "{{ user `docker_hub_username` }}/ctl-ubuntu2004",
         "tags": [
           "latest",
           "{{ user `ver` }}"

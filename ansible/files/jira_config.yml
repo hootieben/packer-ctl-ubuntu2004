@@ -1,0 +1,47 @@
+endpoint: https://litmus.atlassian.net
+editor: nvim
+project: OPS
+user: youruser
+login: youremail@litmus.com
+accountId: 1-2-3:1-2-3-4-5-a
+# click on your profile in Jira and the URL will include this value
+
+#password-source: gopass
+#password-name: litmus.atlassian.net/youremail@litmus.com
+
+custom-commands:
+  - name: tf12
+    help: Display open issues for Terraform upgrade
+    script: |-
+      {{jira}} list --template table -l 5 --query 'project = "OPS" AND resolution = Unresolved and statusCategory in ("To Do") AND "Epic Link" = "TF 012 Upgrade" AND assignee is EMPTY ORDER BY rank ASC, created' 
+  - name: list-clones
+    help: Update sub-tasks to remove clone prefix
+    args:
+      - name: parent
+        required: true
+    script: |-
+      {{jira}} list --template json --query 'project = "OPS" AND parent = "{{ args.parent }}" AND summary ~ "CLONE"'
+  - name: zapi
+    help: Create in-progress Zap issue
+    args:
+      - name: summary
+        type: string
+        repeat: true
+        required: true
+    options:
+      - name: accountId
+        default: $JIRA_ACCOUNT_ID
+    script: |-
+      {{jira}} create -p OPS -i Zap -t create-zap -o size=M -o assignee={{options.accountId}} -o summary="{{ range $i,$w := args.summary }}{{ if $i }} {{ end }}{{ $w }}{{ end }}"
+  - name: zapd
+    help: Create completed Zap issue
+    args:
+      - name: summary
+        type: string
+        repeat: true
+        required: true
+    options:
+      - name: accountId
+        default: $JIRA_ACCOUNT_ID
+    script: |-
+      {{jira}} create -p OPS -i Zap -t create-zap --noedit -o size=S -o assignee={{options.accountId}} -o summary="{{ range $i,$w := args.summary }}{{ if $i }} {{ end }}{{ $w }}{{ end }}"
