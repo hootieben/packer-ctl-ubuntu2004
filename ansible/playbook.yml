@@ -10,8 +10,8 @@
 
     - name: "Update/upgrade {{ ansible_distribution_release }} packages"
       apt:
-        update_cache: true
-        upgrade: true
+        update_cache: yes
+        upgrade: 'yes'
       when: ansible_facts['os_family'] == 'Debian'
 
     - name: "Install Base Packages"
@@ -24,6 +24,7 @@
           - fdutils
           - fzf
           - git
+          - irpas
           - jq
           - lsof
           - procps
@@ -37,8 +38,45 @@
           - unattended-upgrades
           - unzip
           - vim
+          - virtualbox-qt
           - wget
           - zsh
+
+    - name: "Install SRE Packages"
+      package:
+        name:
+          - ansible
+          - vagrant
+
+    - name: Ensures jira directory exists
+      file:
+        path: "/home/vagrant/.jira.d"
+        state: directory
+
+    - name: Ensures bash profile exists
+      copy:
+        content: ""
+        dest: "/home/vagrant/.bash_profile"
+        force: no
+
+    - name: Add jira-cli to bash profile
+      blockinfile:
+        dest: "/home/vagrant/.bash_profile"
+        content: |
+          #Jira Setup
+          eval "$(jira --completion-script-bash)"
+
+    - name: "Setup Jira cli"
+      copy:
+        src: files/jira_config.yml
+        dest: "/home/vagrant/.jira.d/config.yml"
+
+    - name: "Install SRE Packages: pip"
+      pip:
+        name:
+          - pywinrm #used to run Ansible against Windows nodes
+          - redis #used in litmus-admin-ansible
+          - jira-cli
 
     - name: "Fetch AWS CLI v2"
       unarchive:
